@@ -101,7 +101,7 @@ class LanguageText(TextData):
         PAD_position = self.embeddings.get_pad_pos(initialize=initialize)
 
         for elem in self.data_sets[data_type]:
-            sent_length = len(elem['tokens'])
+            sent_length = len(elem['sentence_positions'])
             for bucket in self.buckets:
                 if sent_length <= bucket:
                     elem['length'] = sent_length

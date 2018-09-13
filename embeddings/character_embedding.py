@@ -68,27 +68,27 @@ class CharacterEmbeddings(Embeddings):
         embeddings = []
 
         self.add_term("<S>", preload=preload)
-        embedding = np.zeros(K+4)
-        embedding[0] = 1
+        embedding = np.zeros(K+4, dtype=np.float64)
+        embedding[0] = 1.0
         embeddings.append(embedding)
         self.add_term("</S>", preload=preload)
-        embedding = np.zeros(K+4)
-        embedding[1] = 1
+        embedding = np.zeros(K+4, dtype=np.float64)
+        embedding[1] = 1.0
         embeddings.append(embedding)
         self.add_term("<PAD>", preload=preload)
-        embedding = np.zeros(K+4)
-        embedding[2] = 1
+        embedding = np.zeros(K+4, dtype=np.float64)
+        embedding[2] = 1.0
         embeddings.append(embedding)
         self.add_term("<UNK>", preload=preload)
-        embedding = np.zeros(K+4)
-        embedding[3] = 1
+        embedding = np.zeros(K+4, dtype=np.float64)
+        embedding[3] = 1.0
         embeddings.append(embedding)
 
         for k in range(K):
             token = token_list[k][0]
             self.add_term(token, preload=preload)
-            embedding = np.zeros(K + 4)
-            embedding[k+4] = 1
+            embedding = np.zeros(K + 4, dtype=np.float64)
+            embedding[k+4] = 1.0
             embeddings.append(embedding)
 
         return np.array(embeddings)

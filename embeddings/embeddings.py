@@ -114,7 +114,7 @@ class Embeddings(object):
 
             # initialize and load embeddings
             self.embeddings = nn.Embedding(len(embeddings), self.embedding_size, padding_idx=self.get_pad_pos())
-            self.embeddings.weight = nn.Parameter(torch.from_numpy(embeddings))
+            self.embeddings.weight = nn.Parameter(torch.from_numpy(embeddings).float())
 
 
     def get_vocab_size(self):
