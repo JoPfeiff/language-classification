@@ -66,7 +66,7 @@ class LanguageText(TextData):
         if self.name == 'Language_Text_100':
             path = '../data/data_set/data_set_100_' + data_type
             if not os.path.isfile(path):
-                path = 'data/data/data_set/data_set_100_' + data_type
+                path = 'data/data_set/data_set_100_' + data_type
                 if not os.path.isfile(path):
                     raise Exception(
                         "tokens dont exist")
@@ -74,7 +74,7 @@ class LanguageText(TextData):
         if self.name == 'Language_Text_1000':
             path = '../data/data_set/data_set_1000_' + data_type
             if not os.path.isfile(path):
-                path = 'data/data/data_set/data_set_1000_' + data_type
+                path = 'data/data_set/data_set_1000_' + data_type
                 if not os.path.isfile(path):
                     raise Exception(
                         "tokens dont exist")
@@ -82,7 +82,7 @@ class LanguageText(TextData):
         if self.name == 'Language_Text_10000':
             path = '../data/data_set/data_set_10000_' + data_type
             if not os.path.isfile(path):
-                path = 'data/data/data_set/data_set_10000_' + data_type
+                path = 'data/data_set/data_set_10000_' + data_type
                 if not os.path.isfile(path):
                     raise Exception(
                         "tokens dont exist")

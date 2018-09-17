@@ -22,29 +22,29 @@ class CharacterEmbeddings(Embeddings):
 
         # check if the FastText Data exisits
         self.name = name
-
+        print("building character embeddings")
         if self.name == 'character_100':
             self.path = '../data/data_set/tokens_100'
             if not os.path.isfile(self.path):
-                self.path = 'data/data/data_set/tokens_100'
+                self.path = 'data/data_set/tokens_100'
                 if not os.path.isfile(self.path):
-                    raise Exception(
-                        "tokens dont exist")
+                    raise Exception( self.path +
+                        " tokens dont exist")
 
         if self.name == 'character_1000':
             self.path = '../data/data_set/tokens_1000'
             if not os.path.isfile(self.path):
-                self.path = 'data/data/data_set/tokens_1000'
+                self.path = 'data/data_set/tokens_1000'
                 if not os.path.isfile(self.path):
-                    raise Exception(
+                    raise Exception(self.path +
                         "tokens dont exist")
 
         if self.name == 'character_10000':
             self.path = '../data/data_set/tokens_10000'
             if not os.path.isfile(self.path):
-                self.path = 'data/data/data_set/tokens_10000'
+                self.path = 'data/data_set/tokens_10000'
                 if not os.path.isfile(self.path):
-                    raise Exception(
+                    raise Exception(self.path +
                         "tokens dont exist")
 
 
@@ -58,12 +58,15 @@ class CharacterEmbeddings(Embeddings):
         # This embedding dataset does not have PAD UNK START and END tokens pretrained that is why we initialize them
         # ourselves and only load K - 4 embeddings
 
-        K = K - 4
 
         token_dict = pickle_call(self.path)
 
         token_list = [[token, counts] for token, counts in token_dict.items()]
         token_list = sorted(token_list, key=lambda x: -x[1])
+
+        K = K - 4
+
+        K = min(K, len(token_list))
 
         embeddings = []
 
@@ -90,6 +93,8 @@ class CharacterEmbeddings(Embeddings):
             embedding = np.zeros(K + 4, dtype=np.float64)
             embedding[k+4] = 1.0
             embeddings.append(embedding)
+
+        self.embedding_size = K + 4
 
         return np.array(embeddings)
 

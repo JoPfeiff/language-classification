@@ -86,6 +86,7 @@ class DataLoader:
                                     embeddings=self.embedding)
             self.load_class_data = self.data_ob.load_snli
             self.generator = self.data_ob.generator
+            self.get_label_list()
         elif data_set == 'billion_words':
             self.data_ob = BillionWordsData(embeddings=self.embedding, data_params=param_dict)
             self.load_class_data = self.data_ob.load_billion_words
@@ -98,12 +99,17 @@ class DataLoader:
             self.data_ob = LanguageText(embeddings=self.embedding, data_params=param_dict, labels=self.labels)
             self.load_class_data = self.data_ob.load_data
             self.generator = self.data_ob.generator
+            self.get_label_list()
         else:
             raise Exception("No valid data_set set was set")
 
         # The name is derived from all chosen parameters and dataset names. This is necessary to define a distinct
         # pickle file name
         self.name = data_set + "_" + self.embedding.name + "_" + self.embedding_loading +  "_" + str(embedding_size)
+
+    def get_label_list(self):
+        # self.label_list = [key for key, value in self.labels.items()]
+        self.label_list = [k for k in sorted(self.labels, key=self.labels.get, reverse=False)]
 
     def initialize_embeddings(self):
         """
@@ -154,7 +160,8 @@ class DataLoader:
         embedding_data_loaded = self.embedding.load(path + self.name + '_embeddings.pkl')
         if class_data_loaded and embedding_data_loaded:
             self.loaded = True
-
+            self.embedding_size = self.embedding.embeddings.embedding_dim
+            # self.K_embeddings =
 
 
     def get_train_data(self, initialize_term=False):
