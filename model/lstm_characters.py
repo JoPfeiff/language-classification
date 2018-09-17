@@ -389,6 +389,101 @@ def train(parameters, dl, epochs=100, batch_size=32, best_acc=-float('inf')):
     return model.best_acc
 
 
+def random_walk(epochs=100, nr_samples=1, data_set_name='Language_Text_10000', embedding_name='character_10000', lrs=[0.001],
+                batch_sizes=[32], hidden_sizes=[32], n_layers_list=[1], dropouts=[0.0], optimizer_types=['adam']):
+
+    class_params = {'name': data_set_name}
+    dl = DataLoader(data_set=data_set_name, embeddings_initial=embedding_name, embedding_loading='top_k',
+                    K_embeddings=float('inf'), param_dict=class_params)
+    dl.load('data/pickles/')
+    dl.get_all_and_dump('data/pickles/')
+
+    best_acc = -float('inf')
+
+    for i in range(nr_samples):
+
+        lr = np.random.choice(lrs)
+        batch_size = np.random.choice(batch_sizes)
+        hidden_size = np.random.choice(hidden_sizes)
+        n_layers = np.random.choice(n_layers_list)
+        optimizer_type = np.random.choice(optimizer_types)
+        if n_layers == 1:
+            dropout = 0.0
+        else:
+            dropout = np.random.choice(dropouts)
+
+        # batch_size = np.random.choice(batch_sizes)
+        # hidden_size = np.random.choice([8,16,32,64,128,256])
+        # n_layers = np.random.choice([1,2])
+        # if n_layers == 1:
+        #     dropout = 0.0
+        # else:
+        #     dropout = np.random.choice([0.0,0.3,0.6])
+
+        hyperparameters, dl = define_hyperparams_and_load_data(dl=dl, data_set_name=data_set_name,
+                                                               embedding_name = embedding_name,
+                                                               batch_size=batch_size, hidden_size=hidden_size,
+                                                               n_layers=n_layers, dropout=dropout, lr=lr ,
+                                                               optimizer_type=optimizer_type, best_acc=best_acc)
+
+        print hyperparameters
+
+        best_acc = train(hyperparameters, dl,  epochs=epochs, batch_size=batch_size, best_acc=best_acc)
+
+
+
+def define_hyperparams_and_load_data(best_params=None, dl=None, data_set_name='Language_Text_100',
+                                     embedding_name = 'character_100', batch_size=32, hidden_size=32, n_layers=1,
+                                     dropout=0.0, lr=0.001 , optimizer_type='adam', best_acc=0.0):
+
+    if best_params is not None:
+        if 'data_set_name' in best_params:
+            data_set_name = best_params['data_set_name']
+            if data_set_name.endswith("10000"):
+                embedding_name = 'character_10000'
+            elif  data_set_name.endswith("1000"):
+                embedding_name = 'character_1000'
+            else:
+                embedding_name = 'character_100'
+        if 'batch_size' in best_params:
+            batch_size = best_params['batch_size']
+        if 'hidden_size' in best_params:
+            hidden_size = best_params['hidden_size']
+        if 'n_layers' in best_params:
+            n_layers = best_params['n_layers']
+        if 'dropout' in best_params:
+            dropout = best_params['dropout']
+        if 'lr' in best_params:
+            lr = best_params['lr']
+        if 'optimizer_type' in best_params:
+            optimizer_type = best_params['optimizer_type']
+        if 'best_acc' in best_params:
+            best_acc = best_params['best_acc']
+
+    if dl is None:
+        class_params = {'name': data_set_name}
+        dl = DataLoader(data_set=data_set_name, embeddings_initial=embedding_name, embedding_loading='top_k',
+                        K_embeddings=float('inf'), param_dict=class_params)
+        dl.load('data/pickles/')
+        dl.get_all_and_dump('data/pickles/')
+
+    hyperparameters = {}
+    hyperparameters['optimizer_type'] = optimizer_type
+    hyperparameters['lr'] = lr
+    hyperparameters['hidden_size'] = hidden_size
+    hyperparameters['batch_size'] = batch_size
+    hyperparameters['vocab_size'] = dl.embedding.get_vocab_size()
+    hyperparameters['n_layers'] = n_layers
+    hyperparameters['dropout'] = dropout
+    hyperparameters['padding_idx'] = dl.embedding.get_pad_pos()
+    hyperparameters['num_classes'] = len(dl.labels)
+    hyperparameters['embedding'] = dl.embedding.get_embeddings()
+    hyperparameters['embedding_size'] = dl.embedding.embedding_size
+    hyperparameters['data_set_name'] = data_set_name
+    hyperparameters['best_acc'] = best_acc
+
+    return hyperparameters, dl
+
 def predict_sentence(model, dl, sentence_list):
 
     sentence_tokens = []
@@ -420,49 +515,9 @@ def predict_sentence(model, dl, sentence_list):
 
     return pred_lang
 
-
-def random_walk():
-
-    epochs = 500
-
-    for data_set_name, embedding_name in [['Language_Text_100', 'character_100'],
-                                          ['Language_Text_1000', 'character_1000'],
-                                          ['Language_Text_10000', 'character_10000']]:
-
-        class_params = {'name': data_set_name}
-        dl = DataLoader(data_set=data_set_name, embeddings_initial=embedding_name, embedding_loading='top_k',
-                        K_embeddings=float('inf'), param_dict=class_params)
-        dl.load('data/pickles/')
-        dl.get_all_and_dump('data/pickles/')
-
-        best_acc = -float('inf')
-
-        lr = 0.001
-
-        for i in range(10):
-
-            batch_size = np.random.choice([32,64])
-            hidden_size = np.random.choice([8,16,32,64,128,256])
-            n_layers = np.random.choice([1,2])
-            if n_layers == 1:
-                dropout = 0.0
-            else:
-                dropout = np.random.choice([0.0,0.3,0.6])
-
-            hyperparameters, dl = define_hyperparams_and_load_data(dl=dl, data_set_name=data_set_name,
-                                                                   embedding_name = embedding_name,
-                                                                   batch_size=batch_size, hidden_size=hidden_size,
-                                                                   n_layers=n_layers, dropout=dropout, lr=lr ,
-                                                                   optimizer_type='adam', best_acc=best_acc)
-
-            print hyperparameters
-
-            best_acc = train(hyperparameters, dl,  epochs=epochs, batch_size=batch_size, best_acc=best_acc)
-
-
 def predict_test_set():
 
-    best_params = load_params('../data/models/Language_Text_10000/best_Language_Text_10000model.log')
+    best_params = load_params('data/models/Language_Text_10000/best_Language_Text_10000model.log')
 
     hyperparameters, dl = define_hyperparams_and_load_data(best_params=best_params)
 
@@ -476,61 +531,10 @@ def predict_test_set():
     print acc
 
 
-def define_hyperparams_and_load_data(best_params=None, dl=None, data_set_name='Language_Text_100', embedding_name = 'character_100', batch_size=32,
-                       hidden_size=32, n_layers=1, dropout=0.0, lr=0.001 , optimizer_type='adam', best_acc=0.0):
 
-    if best_params is not None:
-        if 'data_set_name' in best_params:
-            data_set_name = best_params['data_set_name']
-            if data_set_name.endswith("10000"):
-                embedding_name = 'character_10000'
-            elif  data_set_name.endswith("1000"):
-                embedding_name = 'character_1000'
-            else:
-                embedding_name = 'character_100'
-        if 'batch_size' in best_params:
-            batch_size = best_params['batch_size']
-        if 'hidden_size' in best_params:
-            hidden_size = best_params['hidden_size']
-        if 'n_layers' in best_params:
-            n_layers = best_params['n_layers']
-        if 'dropout' in best_params:
-            dropout = best_params['dropout']
-        if 'lr' in best_params:
-            lr = best_params['lr']
-        if 'optimizer_type' in best_params:
-            optimizer_type = best_params['optimizer_type']
-        if 'best_acc' in best_params:
-            best_acc = best_params['best_acc']
+def command_line_prediction(best_params_file):
 
-    if dl is None:
-        class_params = {'name': data_set_name}
-        dl = DataLoader(data_set=data_set_name, embeddings_initial=embedding_name, embedding_loading='top_k',
-                        K_embeddings=float('inf'), param_dict=class_params)
-        dl.load('../data/pickles/')
-        dl.get_all_and_dump('../data/pickles/')
-
-    hyperparameters = {}
-    hyperparameters['optimizer_type'] = optimizer_type
-    hyperparameters['lr'] = lr
-    hyperparameters['hidden_size'] = hidden_size
-    hyperparameters['batch_size'] = batch_size
-    hyperparameters['vocab_size'] = dl.embedding.get_vocab_size()
-    hyperparameters['embedding_size'] = dl.embedding_size
-    hyperparameters['n_layers'] = n_layers
-    hyperparameters['dropout'] = dropout
-    hyperparameters['padding_idx'] = dl.embedding.get_pad_pos()
-    hyperparameters['num_classes'] = len(dl.labels)
-    hyperparameters['embedding'] = dl.embedding.get_embeddings()
-    hyperparameters['data_set_name'] = data_set_name
-    hyperparameters['best_acc'] = best_acc
-
-    return hyperparameters, dl
-
-
-def command_line_prediction():
-
-    best_params = load_params('../data/models/Language_Text_10000/best_Language_Text_10000model.log')
+    best_params = load_params(best_params_file)
 
     hyperparameters, dl = define_hyperparams_and_load_data(best_params=best_params)
 
@@ -546,9 +550,9 @@ def command_line_prediction():
 
         print "Your sentence was in " + lang[0]
 
-def predict_doc_list(file_name, target_doc):
+def predict_doc_list(file_name, target_doc, best_params_file):
 
-    best_params = load_params('../data/models/Language_Text_10000/best_Language_Text_10000model.log')
+    best_params = load_params(best_params_file)
 
     hyperparameters, dl = define_hyperparams_and_load_data(best_params=best_params)
 
@@ -573,14 +577,17 @@ def predict_doc_list(file_name, target_doc):
     if sentence_list != []:
         pred_list += predict_sentence(model, dl, sentence_list)
 
+    pred_list = np.array(pred_list).reshape((-1, 1))
+
     with open(target_doc, "wb") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, dialect='excel')
         writer.writerows(pred_list)
 
 if __name__ == '__main__':
+    pass
     # random_walk()
     # command_line_prediction()
     # predict_test_set()
-    predict_doc_list('../data/raw/Small/English/Books.raw.en', '../data/raw/Small/English/pred')
+    # predict_doc_list('../data/raw/Small/English/Books.raw.en', '../data/raw/Small/English/pred')
 
 

@@ -160,7 +160,7 @@ class DataLoader:
         embedding_data_loaded = self.embedding.load(path + self.name + '_embeddings.pkl')
         if class_data_loaded and embedding_data_loaded:
             self.loaded = True
-            self.embedding_size = self.embedding.embeddings.embedding_dim
+            self.embedding.embedding_size = self.embedding.embeddings.embedding_dim
             # self.K_embeddings =
 
 
