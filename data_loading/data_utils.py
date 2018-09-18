@@ -73,8 +73,6 @@ def create_model_path(directory, directory_name=None):
     if not os.path.exists(model_path):
         os.makedirs(model_path)
 
-    print model_path
-
     return model_path + "/"
 
 def load_params(file_name):

@@ -22,7 +22,7 @@ class CharacterEmbeddings(Embeddings):
 
         # check if the FastText Data exisits
         self.name = name
-        print("building character embeddings")
+
         if self.name == 'character_100':
             self.path = '../data/data_set/tokens_100'
             if not os.path.isfile(self.path):

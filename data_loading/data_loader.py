@@ -156,37 +156,28 @@ class DataLoader:
         :param path:
         :return:
         """
+        print"\nLoading text data"
         class_data_loaded = self.data_ob.load(path + self.name + '_data.pkl')
+        print"\nLoading embedding data"
         embedding_data_loaded = self.embedding.load(path + self.name + '_embeddings.pkl')
         if class_data_loaded and embedding_data_loaded:
             self.loaded = True
             self.embedding.embedding_size = self.embedding.embeddings.embedding_dim
-            # self.K_embeddings =
+
 
 
     def get_train_data(self, initialize_term=False):
-        # if self.data_set == "SNLI":
         return self.load_class_data('train', initialize_term=initialize_term)
-        # else:
-        #     raise Exception("Dataset not specified")
-
 
     def get_test_data(self, initialize_term=False):
-        # if self.data_set == "SNLI":
         if self.data_set == "billion_words":
             print('test data does not exist')
             return None
 
         return self.load_class_data('test', initialize_term=initialize_term)
-        # else:
-        #     raise Exception("Dataset not specified")
-
 
     def get_dev_data(self, initialize_term=False):
-        # if self.data_set == "SNLI":
         return self.load_class_data('dev', initialize_term=initialize_term)
-        # else:
-        #     raise Exception("Dataset not specified")
 
     def get_labels(self):
         if self.data_set == "billion_words":

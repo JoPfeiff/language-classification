@@ -3,20 +3,15 @@ import json
 import numpy as np
 import torch as torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from data_loading.data_loader import DataLoader
 from data_loading.data_utils import create_model_path, load_params, pad_positions
-import random
-import time
 import sys
 from tqdm import *
 import csv
 reload(sys)
 sys.setdefaultencoding('utf8')
-
-from scipy.stats import spearmanr
 
 if torch.cuda.is_available():
     USE_CUDA = True
@@ -28,27 +23,32 @@ else:
 
 class LSTMCharacters(nn.Module):
     """
-    This class maps original embeddings to retrofit embeddings. A multilayer perceptron of defined depth and defined
-    hidden size calculates the difference between the actual retrofit embedding and predicted embedding
-    A set of hyperparameters are choosable (depth, hidden size, activation function, loss function, etc.)
+    This class defines the architecture for a character based LSTM for language prediction.
+    Based on defined hyperparameters the depth of the hidden layers etc. is set up
     """
     def __init__(self, batch_size, hidden_size, vocab_size, embedding_size, n_layers, dropout, padding_idx,
                        num_classes, embedding , lr , optimizer_type, data_set_name, best_acc):
         """
         Initialize Model
-        :param h_size: size of the hidden layers except input and output layers.
-        :param depth: numper of hidden layers
-        :param embedding_size: size of the embeddings
-        :param activation_type: 'tanh', 'relu', 'swish'
-        :param loss_function_type: 'cosine, 'mse', 'hinge-cosine'
-        :param optimizer_type: 'adam', 'sgd', 'adagrad'
-        :param lr: learning rate
-        :param margin: if negative sampling, the margin for margin based hinge loss
+        :param batch_size
+        :param hidden_size: size of the hidden layers except input and output layers.
+        :param vocab_size: NOT USED DEPRECATE
+        :param embedding_size: size of the one-hot-encoded "embedding" of each character
+        :param n_layers: number of layers of each LSTM unit
+        :param dropout: dropout probability between layers
+        :param padding_idx: the index which is used for padding
+        :param num_classes: number languages to be predicted
+        :param embedding: the embedding object
+        :param lr: the initial learning rate
+        :param optimizer_type: the optimizer that is used (e.g. adam)
+        :param data_set_name: which of the 3 (small, medium, big) data sets is used (e.g Language_Text_1000)
+        :param best_acc: the currently best accuracy that a model has achieved for this data set
         """
 
         # call super class
         super(LSTMCharacters, self).__init__()
 
+        # Store all the hyperparameters in the object
         self.batch_size = batch_size
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
@@ -61,17 +61,32 @@ class LSTMCharacters(nn.Module):
         self.embedding = embedding
         self.lr = lr
         self.optimizer_type = optimizer_type
-        self.embedding.weight.requires_grad = False
-        self.LSTM = nn.LSTM(self.embedding_size, self.hidden_size, self.n_layers, dropout=self.dropout,
-                          batch_first=True)
-        self.output_layer = nn.Linear(self.hidden_size, self.num_classes)
         self.data_set_name = data_set_name
         self.best_acc = best_acc
 
+        # initialized the embeddings and set gradients to false (we dont train them)
+        self.embedding.weight.requires_grad = False
+
+        # define the size of on LSTM unit
+        self.LSTM = nn.LSTM(self.embedding_size, self.hidden_size, self.n_layers, dropout=self.dropout,batch_first=True)
+
+        # define the output layer for prediction of the classes (languages)
+        self.output_layer = nn.Linear(self.hidden_size, self.num_classes)
+
+        # define the optimizer (not that this HAS to be defined after defining the LSTM and the output_layer
         self.optimizer = self.get_optimizer()
+
+        # define the loging of the model
         self.create_hyps_and_hash()
 
     def create_hyps_and_hash(self):
+        """
+        In this function wie hack a way to define the name of a model by creating a dictionary of all the hyperparams,
+        forming it to a string and hashing that. This is subsequently defined as the directory name for this model and
+        here we store the logs of the model which includes epoch loss and accuracy of both training and dev sets.
+        """
+
+        # We first dump all the hyperparameters (AGAIN! I know... I said its a hack OK???) into a dict
         self.hyperparameters = {}
         self.hyperparameters['batch_size'] = self.batch_size
         self.hyperparameters['hidden_size'] = self.hidden_size
@@ -91,28 +106,38 @@ class LSTMCharacters(nn.Module):
         self.hyperparameters['data_set_name'] = self.data_set_name
         self.hyperparameters['best_acc'] = self.best_acc
 
+        # We then convert the dict into a string and hash it (to make it shorter)
         model_directory_name = str(hash(str(self.hyperparameters)))
 
-        self.model_type_path = create_model_path(self.data_set_name)
-
+        # we then create a directory with this name
         self.model_path = create_model_path(self.data_set_name, model_directory_name)
 
+        # and also define where we want to store the best model
+        self.model_type_path = create_model_path(self.data_set_name)
+
+        # and we create a bunch of names for each of the logs
         self.store_losses =[]
-        # self.best_overall = float('inf')
-        # self.best_acc = -float('inf')
         self.best_model_path = self.model_type_path + 'best_'+ self.data_set_name + 'model.pth.tar'
         self.best_model_log_name = self.model_type_path + 'best_'+ self.data_set_name + 'model.log'
         self.log_name = self.model_path + 'model.log'
 
-
-
     def forward(self, batch, length,  hidden=None):
+        """
+        This is the forward pass of the model
+        :param batch: a tensor of indexes which are all padded to the same length
+        :param length: the original length of each sentence without padding
+        :param hidden: not needed because we don't forward the hidden state
+        :return: output state for each class
+        """
 
+        # get dynamic batch size
         batch_size = len(batch)
+
         # Get embedded version
         embedded = self.embedding(batch)
 
-        # Need to sort in decreasing order of length and keep track of indices so they can be concatenated together after the LSTM
+        # Need to sort in decreasing order of length and keep track of indices so they can be concatenated together
+        # after the LSTM
         sorted_lens, sorted_idx = torch.sort(length, descending=True)
         sorted = embedded[sorted_idx]
         _, sortedsorted_idx = sorted_idx.sort()
@@ -136,7 +161,7 @@ class LSTMCharacters(nn.Module):
 
     def get_optimizer(self):
         """
-        What type of optimizer is chosen. Also initializes the learningrate
+        What type of optimizer is chosen. Also initializes the learning rate
         :return:
         """
         if self.optimizer_type == 'adam':
@@ -147,8 +172,6 @@ class LSTMCharacters(nn.Module):
             return optim.Adagrad(self.parameters(), lr=self.lr)
 
 
-
-    # def step(self, batch, neg, train=True):
     def step(self, x, length, y, train=True, predict=False, dl=None):
         """
         One step in each epoch. if train is True then back prop is triggered, else only the loss is returned
@@ -161,28 +184,23 @@ class LSTMCharacters(nn.Module):
         # set all gradients to 0
         self.optimizer.zero_grad()
 
-        # get the defined loss function
+        # create the loss function
         loss_function = nn.CrossEntropyLoss()
 
-        # depending on the loss function different inputs have to be set
+        # forward pass of the data
         output = self.forward(x, length)
-        # print(output.data.numpy()[0])
-        # print "model pred"
-        # print dl.label_list[np.argmax(output.data.numpy()[0])]
 
-        # softmax = nn.LogSoftmax(0)
-        # logits = softmax(output)
-
-        # loss = loss_function(logits, y)
+        # get the loss
         loss = loss_function(output, y)
 
-        # train = False
-
+        # if we are not training, we don't need to compute the gradients and therefore return here
         if not train:
             return loss, output.cpu().data.numpy()
 
+        # otherwise we compute the gradients
         loss.backward()
 
+        # and update through the backward pass
         self.optimizer.step()
 
         return loss, output.cpu().data.numpy()
@@ -192,7 +210,11 @@ class LSTMCharacters(nn.Module):
         loops through one epoch of data
         :param generator: the generator that yields randomized data points
         :param train: if we are trainging or validating
-        :return:
+        :param store: if the data should be stored (should only be true if train==False) because we check if we have
+                      trained a better model
+        :param epoch: the epoch we are in
+        :param dl: the data_loader object
+        :return: accuracy of this epoch
         """
 
         # Set the model to train or not train
@@ -201,29 +223,27 @@ class LSTMCharacters(nn.Module):
         # get the next batch
         batch, bucket = generator.next()
 
-        # initialize the list of losses
+        # initialize the list of losses and accuracies
         step = 0
         epoch_loss = []
         steps_loss = []
         acc_list = []
 
+        # as long as we have a batch we loop (if generator.next() returns None, None we break)
         while batch is not None:
 
+            # we retrieve the batch data in a processable way. batch includes a list of dict elements which need to be
+            # processed into a tensor
             x, length, y = get_data_from_batch(batch)
-
-            # for i, elem in enumerate(batch):
-            #     print ""
-            #     print elem['sentence']
-            #     print elem['label']
-            #     # print x.data.numpy()[i]
-            #     print "pred Sentence"
-            #     print predict_sentence(self, dl, elem['sentence'])
 
             # update steps
             step += 1
             if not predict:
+
                 # do one step and get loss
                 loss, output = self.step(x, length, y, train=train, predict=predict, dl=dl)
+
+                # add the loss to the logging lists
                 loss_output = loss.item()
                 epoch_loss.append(loss_output)
                 steps_loss.append(loss_output)
@@ -234,6 +254,8 @@ class LSTMCharacters(nn.Module):
                     print str(np.mean(steps_loss))
                     print("accuracy = ") + str(float(sum(acc_list))/float(len(acc_list)))
                     steps_loss = []
+
+            # if we are not training, we will just print out info at the end (just assuming that this is less data)
             else:
                 loss, output = self.step(x, length, y, train=train, predict=predict, dl=dl)
                 acc_list = self.add_acc_array(acc_list, output, y)
@@ -249,54 +271,75 @@ class LSTMCharacters(nn.Module):
 
         mean_loss = np.mean(epoch_loss)
 
+        # if we are storing the data, we add the data to the validation set and check if we have beaten the already
+        # trained models
         if store:
             self.hyperparameters['validation_loss'].append(float(mean_loss))
             self.hyperparameters['validation_acc'].append(float(acc))
             self.store_model(epoch=epoch, loss=mean_loss, acc=acc)
+
+        # if we are not storing, we will assume that we are training, and add the loss and accuracy to the training logs
         else:
             self.hyperparameters['training_loss'].append(float(mean_loss))
             self.hyperparameters['training_acc'].append(float(acc))
+
         return acc
 
     def add_acc_array(self, acc_list, output, label_tens):
+        """
+        This function compares the predicted labels to the true labels and adds a boolean array to the current acc_list
+        :param acc_list: a boolean list of values for if a label was predicted correctly or not
+        :param output: the predicted labels
+        :param label_tens: the true label tensor
+        :return:
+        """
 
+        # we first retrieve the argmax of each output
         pred = np.argmax(output, axis=1)
+
+        # we retrieve the true labels into a numpy array
         label = label_tens.cpu().data.numpy()
 
+        # we generate a masked list of boolean values if each predicted label matches the true label and append it
         acc_list += list(np.array(pred) == np.array(label))
+
         return acc_list
 
 
     def store_model(self, epoch, loss, acc):
         """
         Dump model to file and log it
-        :param epoch:
-        :param loss:
+        :param epoch: the current epoch we are in
+        :param loss: the loss of the epoch
+        :param acc: the accuracy of the epoch
         :return:
         """
 
-        self.store_losses.append(loss)
-
-        state = {
-            'epoch': epoch + 1,
-            # 'arch': args.arch,
-            'state_dict': self.state_dict(),
-            'best_prec1': loss,
-            'optimizer' : self.optimizer.state_dict(),
-        }
-
-        if min(self.store_losses) == loss:
+        # if the current loss is the best one, define it as the best one
+        if min(self.hyperparameters['training_loss']) == loss:
             self.hyperparameters['best_score'] = float(loss)
+
+        # if the current accuracy is the best one, define it as such
         if max(self.hyperparameters['validation_acc']) == acc:
             self.hyperparameters['best_acc'] = float(acc)
-        # if loss < self.best_overall:
+
+        # if the current accuracy is the best OVERALL (of all models), only then we dump it to file
         if acc > self.best_acc:
+            state = {
+                'epoch': epoch + 1,
+                # 'arch': args.arch,
+                'state_dict': self.state_dict(),
+                'best_prec1': loss,
+                'optimizer' : self.optimizer.state_dict(),
+            }
             print "dumping new best model"
             # shutil.copyfile(self.checkpoint_model_name, self.model_name )
             torch.save(state, self.best_model_path)
             with open(self.best_model_log_name,  'w') as log:
                 log.write(json.dumps(self.hyperparameters, indent=4, sort_keys=True))
             self.best_acc = acc
+
+        # we store the current logs on file as a json
         with open(self.log_name, 'w') as log:
             log.write(json.dumps(self.hyperparameters, indent=4, sort_keys=True))
 
@@ -330,8 +373,7 @@ def get_data_from_batch(batch):
     """
     Transform one batch into data points
     :param batch: the batch of random data points
-    :param neg: if negative sampling is activated this is a set of random negative samples. else this is None
-    :return:
+    :return: X tensor, lengths tensor, labels tensor
     """
 
     # Initialize the list of inputs and outputs
@@ -339,13 +381,17 @@ def get_data_from_batch(batch):
     length = []
     y = []
 
+    # loop through the batch and retrieve the relevant information
     for elem in batch:
         x.append(elem['sentence_positions'])
         length.append(elem['length'])
         y.append(elem['label_pos'])
+
+    # define X and Y as tensors
     x, length = Variable(torch.LongTensor(x)), torch.IntTensor(length)
     y = torch.LongTensor(y)
 
+    # cudarize if needed
     if USE_CUDA:
         x = x.cuda()
         y = y.cuda()
@@ -353,60 +399,104 @@ def get_data_from_batch(batch):
     return x, length, y
 
 
-def train(parameters, dl, epochs=100, batch_size=32, best_acc=-float('inf')):
+def train(parameters, dl, epochs=100, batch_size=32):
+    """
+    Here we train for the defined amount of epochs with early stopping by not having a better accuracy for 10 epochs
+    :param parameters: hyperparameters defined
+    :param dl: data_loading object
+    :param epochs: nr of epochs max
+    :param batch_size: batch size
+    :return: the best accuracy of this model
+    """
 
-    # genClass = PLDataGenerator(small_data_set=small_data_set)
-
+    # define the model
     model = LSTMCharacters(**parameters)
-    # model.load_model()
+
+    # cudarize if needed
     if USE_CUDA:
         model.cuda()
 
+    # initialize some loging stuff
     train_loss = []
     val_acc = []
 
+    # loop through the epooch
     for i in range(epochs):
 
         print("\n\nEPOCH "+str(i+1))
         print("\nTrain")
 
+        # get the training generator for one eopch
         gen = dl.get_generator('train', batch_size=batch_size, drop_last=True, initialize = False)
 
-        train_loss.append(model.epoch(gen, train=True, dl=dl))
+        # train for one epoch and append the accuracy
+        train_loss.append(model.epoch(gen, train=True, dl=dl, epoch=i))
 
         print("\nValidation")
 
+        # get the development generator for one epoch
         gen = dl.get_generator('dev', batch_size=100, drop_last=False, initialize = False)
 
-        val_acc.append(model.epoch(gen, train=False, store=True, predict=True, dl=dl))
+        # calculate the accuracy of this epoch
+        val_acc.append(model.epoch(gen, train=False, store=True, predict=True, dl=dl, epoch=i))
 
-        # Early stopping
+        # Early stopping if the accuracy has not increased for 10 epochs
         if np.argmax(np.array(val_acc)) < len(val_acc) - 10:
             print "\n\n\nEarly stopping triggered"
             print "Best Epoch = " + str(np.argmin(np.array(val_acc)))
             print "Validation loss = " + str(val_acc[np.argmax(np.array(val_acc))])
             break
+
     return model.best_acc
 
 
-def random_walk(epochs=100, nr_samples=1, data_set_name='Language_Text_10000', embedding_name='character_10000', lrs=[0.001],
+def random_walk(best_params_file, epochs=100, nr_samples=1, data_set_name='Language_Text_10000', embedding_name='character_10000', lrs=[0.001],
                 batch_sizes=[32], hidden_sizes=[32], n_layers_list=[1], dropouts=[0.0], optimizer_types=['adam']):
+    """
+    This function randomly samples each hyperparameter and trains the model until early stopping
+    :param best_params_file: location of the log file for the best model
+    :param epochs: max number of epochs
+    :param nr_samples: how many randomly sampled models should be trained
+    :param data_set_name: which data set is to be chosen 'Language_Text_100', Language_Text_1000', 'Language_Text_10000'
+    :param embedding_name: embeddings data set 'character_100', 'character_1000', or 'character_10000'
+    :param lrs: possible learning rates
+    :param batch_sizes: different batch sizes to be tested
+    :param hidden_sizes: LSTM hidden sizes
+    :param n_layers_list: number of layers for each LSTM timestep
+    :param dropouts: dropout probability between LSTM layers
+    :param optimizer_types: optimizer e.g. 'adam', 'sgd'
+    :return: returns the overall best accuracy
+    """
 
+    # load the defined data loader data set, this can be shared for each model because nothing changes
     class_params = {'name': data_set_name}
     dl = DataLoader(data_set=data_set_name, embeddings_initial=embedding_name, embedding_loading='top_k',
                     K_embeddings=float('inf'), param_dict=class_params)
     dl.load('data/pickles/')
     dl.get_all_and_dump('data/pickles/')
 
-    best_acc = -float('inf')
+    # if models have already been trained, get the best accuracy so that we don't overwrite our current best model
+    try:
+        best_params = load_params(best_params_file)
+        best_acc = best_params['best_acc']
 
+    # if not, we just define the accuracy the smallest possible
+    except:
+        best_acc = -float('inf')
+
+    # we randomly sample #nr_samples models and train them until early stopping
     for i in range(nr_samples):
 
+        print("\nCurrent best accuracy = " + str(best_acc)) + '\n'
+
+        # randomly sample the hyperparams
         lr = np.random.choice(lrs)
         batch_size = np.random.choice(batch_sizes)
         hidden_size = np.random.choice(hidden_sizes)
         n_layers = np.random.choice(n_layers_list)
         optimizer_type = np.random.choice(optimizer_types)
+
+        # if we only have one layer, theres no need for dropout (at least for this kind)
         if n_layers == 1:
             dropout = 0.0
         else:
@@ -420,22 +510,41 @@ def random_walk(epochs=100, nr_samples=1, data_set_name='Language_Text_10000', e
         # else:
         #     dropout = np.random.choice([0.0,0.3,0.6])
 
+        # get the hyperparameters by initializing them and retrieving some parameters from data_loader
         hyperparameters, dl = define_hyperparams_and_load_data(dl=dl, data_set_name=data_set_name,
                                                                embedding_name = embedding_name,
                                                                batch_size=batch_size, hidden_size=hidden_size,
                                                                n_layers=n_layers, dropout=dropout, lr=lr ,
                                                                optimizer_type=optimizer_type, best_acc=best_acc)
 
+        print ("Training with the following hyperparameters:")
         print hyperparameters
 
-        best_acc = train(hyperparameters, dl,  epochs=epochs, batch_size=batch_size, best_acc=best_acc)
-
+        # train until early stopping
+        best_acc = train(hyperparameters, dl,  epochs=epochs, batch_size=batch_size)
 
 
 def define_hyperparams_and_load_data(best_params=None, dl=None, data_set_name='Language_Text_100',
                                      embedding_name = 'character_100', batch_size=32, hidden_size=32, n_layers=1,
                                      dropout=0.0, lr=0.001 , optimizer_type='adam', best_acc=0.0):
+    """
+    here we define the hyperparams based on either defined settings, or based on the stored best json log
+    If dl is not defined, we load it
+    :param best_params: json file of best hyper parameters
+    :param dl: data_loading object
+    :param data_set_name: which data set ist to be loaded
+    :param embedding_name: which embedding data set is to be loaded
+    :param batch_size:
+    :param hidden_size:
+    :param n_layers:
+    :param dropout:
+    :param lr:
+    :param optimizer_type:
+    :param best_acc:
+    :return:
+    """
 
+    # if we have passed the dictionary of bestparams we extract that information and set the hyperparameters accordingly
     if best_params is not None:
         if 'data_set_name' in best_params:
             data_set_name = best_params['data_set_name']
@@ -460,6 +569,7 @@ def define_hyperparams_and_load_data(best_params=None, dl=None, data_set_name='L
         if 'best_acc' in best_params:
             best_acc = best_params['best_acc']
 
+    # if we have not passed a data_loader object, we call ist from file
     if dl is None:
         class_params = {'name': data_set_name}
         dl = DataLoader(data_set=data_set_name, embeddings_initial=embedding_name, embedding_loading='top_k',
@@ -467,6 +577,7 @@ def define_hyperparams_and_load_data(best_params=None, dl=None, data_set_name='L
         dl.load('data/pickles/')
         dl.get_all_and_dump('data/pickles/')
 
+    # define all the hyperparameters
     hyperparameters = {}
     hyperparameters['optimizer_type'] = optimizer_type
     hyperparameters['lr'] = lr
@@ -484,14 +595,30 @@ def define_hyperparams_and_load_data(best_params=None, dl=None, data_set_name='L
 
     return hyperparameters, dl
 
-def predict_sentence(model, dl, sentence_list):
 
+def predict_sentence(model, dl, sentence_list):
+    """
+    This function predicts a set of sentences by padding them
+    Note that this does not bucketize them, so this is very inefficient
+    :param model: LSTM model
+    :param dl: data_loader object
+    :param sentence_list: list of string sentences to be predicted
+    :return: a list of predicted languages
+    """
+
+    # initialize the list of tokens
     sentence_tokens = []
 
+    # the longest sentence
     max_len = 0
+
+    # original length of the sentences
     lengths = []
+
+    # padding position
     pad_position = dl.embedding.get_pad_pos()
 
+    # for each sentence we encode the positoins and update the lists
     for sentence in sentence_list:
         encoded = dl.embedding.encode_sentence(sentence)
         sentence_tokens.append(encoded)
@@ -499,95 +626,138 @@ def predict_sentence(model, dl, sentence_list):
         max_len = max(length, max_len)
         lengths.append(length)
 
+    # initialize the padding encodings
     padded_encodings = []
 
+    # we pad each encoded sentence to the max length of the list of passed sentences
     for encodings in sentence_tokens:
         padded_encodings.append(pad_positions(encodings, pad_position, max_len))
 
+    # we transform it into a Tensor
     sentence_encoding = torch.LongTensor(padded_encodings)
 
-    # print sentence_encoding.data.numpy()[0]
-
+    # transform the lengths into tensors
     lengths = torch.LongTensor(lengths)
+
+    # predict the sentences
     prediction = np.argmax(model.forward(sentence_encoding,lengths).cpu().data.numpy(), axis=1)
 
+    # decode the languages
     pred_lang = list(np.array(dl.label_list)[prediction])
 
     return pred_lang
 
-def predict_test_set():
 
-    best_params = load_params('data/models/Language_Text_10000/best_Language_Text_10000model.log')
+def predict_test_set(best_file_name):
+    """
+    Predict the held out test set
+    :param best_file_name: The location of the best parameters
+    :return:
+    """
 
+    # load the best parameters
+    best_params = load_params(best_file_name)
+
+    # define the hyperparameters and load the data loading object
     hyperparameters, dl = define_hyperparams_and_load_data(best_params=best_params)
 
+    # define the model architecture
     model = LSTMCharacters(**hyperparameters)
 
+    # load the model from file
     model.load_model()
 
+    # generate the test set generator
     test_gen = dl.get_generator('test', drop_last=False, batch_size=64)
 
-    acc = model.epoch(test_gen, train=False)
+    # loop throught the data and get the accuracy
+    acc = model.epoch(test_gen, train=False, predict=True, store=False)
+
     print acc
 
 
-
 def command_line_prediction(best_params_file):
+    """
+    This is the demo case where you can enter a sentence in the command line and it predicts the language
+    :param best_params_file: the best parameter file
+    :return:
+    """
 
+    # get the bes parameters
     best_params = load_params(best_params_file)
 
+    # define the hyperparameters and get the data loading object
     hyperparameters, dl = define_hyperparams_and_load_data(best_params=best_params)
 
+    # build the model and load the parameters from file
     model = LSTMCharacters(**hyperparameters)
-
     model.load_model()
 
+    print("\nData and model loading successful")
+    print("\nDemo prediction ready! \n")
+
+    # until the user force stopps we predict
     while True:
 
+        # get the user input
         text = raw_input("Please write your sentence: ", ).decode('utf-8')
 
+        # predict the sentence
         lang = predict_sentence(model, dl, [text])
 
         print "Your sentence was in " + lang[0]
 
-def predict_doc_list(file_name, target_doc, best_params_file):
 
+def predict_doc_list(file_name, target_doc, best_params_file):
+    """
+    Based on a user defined text document where each line represents a sentence or document, this function predicts
+    the language for each line and dumps the predicteion in the target_doc
+    :param file_name: file with sentences/documents per line
+    :param target_doc: destination of prediction
+    :param best_params_file: file with the best model hyperparameters
+    :return:
+    """
+
+    # load the best hyperparameters
     best_params = load_params(best_params_file)
 
+    # load hyperparameters and data loading object
     hyperparameters, dl = define_hyperparams_and_load_data(best_params=best_params)
 
+    # define architecture of model
     model = LSTMCharacters(**hyperparameters)
 
+    # load the parameters from file
     model.load_model()
 
+    # list of predictions and sentences
     pred_list = []
-
     sentence_list = []
 
+    # loop through the file
     with open(file_name, 'r') as f:
         for sentence in tqdm(f):
 
+            # append to list for a batch
             sentence_list.append(sentence)
 
+            # if batch is 100 long we predict
             if len(sentence_list) == 100:
 
+                # predict the sentence languages
                 pred_list += predict_sentence(model, dl, sentence_list)
                 sentence_list = []
 
+    # also predict last batch
     if sentence_list != []:
         pred_list += predict_sentence(model, dl, sentence_list)
 
+    # reshape predictions and dump to file
     pred_list = np.array(pred_list).reshape((-1, 1))
-
     with open(target_doc, "wb") as f:
         writer = csv.writer(f, dialect='excel')
         writer.writerows(pred_list)
 
 if __name__ == '__main__':
     pass
-    # random_walk()
-    # command_line_prediction()
-    # predict_test_set()
-    # predict_doc_list('../data/raw/Small/English/Books.raw.en', '../data/raw/Small/English/pred')
-
 
