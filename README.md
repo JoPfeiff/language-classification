@@ -2,6 +2,39 @@
 
 In this repository I have built a **character level LSTM model** that predicts the language of a sentence or a text document.
 The data set is based on **EU Bookshop data** which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included **32 languages** for which more than 10000 sentences exist. <br/> 
+The following Languages are supported:
+- Bulgarian - label = 'bg'
+- Catalan - label = 'ca' <br/>
+- Czeck - label = 'cs' <br/>
+- Walsh - label = 'cy' <br/>
+- Danish - label = 'da' <br/>
+- German - label = 'de' <br/>
+- Greek - label = 'el' <br/>
+- English - label = 'en' <br/>
+- Spanish - label = 'es' <br/>
+- Estonian - label = 'et' <br/>
+- Finnish - label = 'fi' <br/>
+- French - label = 'fr' <br/>
+- Irish - label = 'ga' <br/>
+- Croatian - label = 'hr' <br/>
+- Hungarian - label = 'hu' <br/>
+- Islandic - label = 'is' <br/>
+- Italian - label = 'it' <br/>
+- Lithuanian - label = 'lt' <br/>
+- Latvian - label = 'lv' <br/>
+- Mazedonian - label = 'mk' <br/>
+- Maltan - label = 'mt' <br/>
+- Norwegian - label = 'nb' <br/>
+- Dutch - label = 'nl' <br/>
+- Polish - label = 'pl' <br/>
+- Portuguese - label = 'pt' <br/>
+- Romanian - label = 'ro' <br/>
+- Russian - label = 'ru' <br/>
+- Slowakian - label = 'sk' <br/>
+- Slowenian - label = 'sl' <br/>
+- Swedish - label = 'sv' <br/>
+- Turkish - label = 'tr' <br/>
+- Ukranian - label = 'uk' <br/>
 
 ## Core Model Repository Structure
 This repository builds upon my `data_loading` framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
@@ -22,6 +55,8 @@ The raw data links can be found in `raw_data_links.txt` <br/>
 If you want to generate the data set from raw data please download all files and store them in `data/raw/Big/` <br/>
 
 ## Installation
+**PLEASE FIRST DOWNLOAD THE DATA (see previous point)**
+
 The code was written in python 2.7. <br/>
 Please consider running the code in a virtual environment: <br/>
 https://packaging.python.org/guides/installing-using-pip-and-virtualenv/  <br/>
