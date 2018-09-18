@@ -1,6 +1,9 @@
 # Classification of Text Language
 
 In this repository I have built a character based LSTM model that predicts the language of a sentence or a text document.
+The data set is based on EU Bookshop data which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included languages for which more than 10000 sentences exist. <br/> 
+
+This repository builds upon my data_loading framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
 
 ## Data
 The preprocessed training data can be found here: <br/>
@@ -72,6 +75,12 @@ There is also the possibility to predict the labels of text documents. This API 
 ```
 $ python start.py --data_set small --task predict  --file path/to/file.txt --destination path/to/destination.txt
 ```
+
+# Data Set Generation
+The three different data sets were built using 100, 1000, and 10000 sampled sentences for each language. The training set consists of 80% of the data whereas development and test set each consist of 10% of the data. <br/>
+The script for generating the data sets can be found in `data_set_generation/data_set_generation.py`
+
+
 
 
 
