@@ -1,0 +1,45 @@
+The raw data can be found here:
+
+http://opus.nlpl.eu/EUbookshop.php
+
+If you want to generate the data set based on the raw data please download the original files and store them in
+
+data/raw/Big/
+
+Download links are the row titles of the bottom matrix:
+
+'bg': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.bg.gz
+'ca': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.ca.gz
+'cs': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.cs.gz
+'cy': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.cy.gz
+'da': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.da.gz
+'de': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.de.gz
+'el': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.el.gz
+'en': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.en.gz
+'es': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.es.gz
+'et': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.et.gz
+'fi': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.fi.gz
+'fr': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.fr.gz
+'ga': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.ga.gz
+'hr': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.hr.gz
+'hu': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.hu.gz
+'is': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.is.gz
+'it': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.it.gz
+'lt': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.lt.gz
+'lv': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.lv.gz
+'mk': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.mk.gz
+'mt': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.mt.gz
+'nb': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.nb.gz
+'nl': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.nl.gz
+'pl': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.pl.gz
+'pt': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.pt.gz
+'ro': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.ro.gz
+'ru': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.ru.gz
+'sk': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.sk.gz
+'sl': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.sl.gz
+'sv': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.sv.gz
+'tr': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.tr.gz
+'uk': http://opus.nlpl.eu/download.php?f=EUbookshop/mono/EUbookshop.raw.uk.gz
+
+
+
