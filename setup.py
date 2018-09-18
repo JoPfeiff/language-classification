@@ -23,7 +23,6 @@ REQUIRES_PYTHON = '>=2.7'
 # What packages are required for this module to be executed?
 REQUIRED = [
     'numpy', 'torch', 'torchvision', 'tqdm', 'scipy'
-    # 'requests', 'maya', 'records',
 ]
 
 # What packages are optional?

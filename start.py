@@ -15,16 +15,18 @@ parser.add_argument("--destination", default=None, type=str)
 
 # if train we will define a random walk over the defined parameters
 parser.add_argument("--nr_samples", default=1, type=int)
-parser.add_argument("--batch_sizes", default=[32], type=list)
-parser.add_argument("--hidden_sizes", default=[32], type=list)
-parser.add_argument("--n_layers_list", default=[1], type=list)
-parser.add_argument("--dropouts", default=[0.0], type=list)
-parser.add_argument("--lrs", default=[0.001], type=list)
-parser.add_argument("--optimizer_types", default=['adam'], type=list)
+parser.add_argument("--batch_sizes", default=[32], nargs='+', type=int, dest='batch_sizes')
+# parser.add_argument("--batch_sizes", default=[32], type=list)
+parser.add_argument("--hidden_sizes", default=[32], nargs='+', type=int, dest='hidden_sizes')
+parser.add_argument("--n_layers_list", default=[1], nargs='+', type=int, dest='n_layers_list')
+parser.add_argument("--dropouts", default=[0.0], nargs='+', type=float, dest='dropouts')
+parser.add_argument("--lrs", default=[0.001], nargs='+', type=float, dest='lrs')
+parser.add_argument("--optimizer_types", default=['adam'], nargs='+', type=str, dest='optimizer_types')
 parser.add_argument("--epochs", default=100, type=int)
 
-
 parsed = vars(parser.parse_args())
+
+print parsed
 
 if parsed['data_set'] == 'small':
     data_set_name = 'Language_Text_100'
