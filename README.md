@@ -1,9 +1,9 @@
 # Classification of Text Language
 
-In this repository I have built a character based LSTM model that predicts the language of a sentence or a text document.
-The data set is based on EU Bookshop data which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included languages for which more than 10000 sentences exist. <br/> 
+In this repository I have built a **character based LSTM model** that predicts the language of a sentence or a text document.
+The data set is based on **EU Bookshop data** which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included **32 languages** for which more than 10000 sentences exist. <br/> 
 
-This repository builds upon my data_loading framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
+This repository builds upon my `data_loading` framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
 
 The data_set is **generated** using `data_set_generation/data_set_generation.py` <br/>
 The data_set is **built** using `data_loading/data_loader.py` which gets as input the objects defined in  <br/>
@@ -15,10 +15,10 @@ The **model** can be found in `model/lstm_characters.py` <br/>
 ## Data
 The preprocessed training data can be found here: <br/>
 https://www.dropbox.com/sh/mrw2gm9saj4fmy1/AAAvaf5rTzFLhDWe-BM3vUiFa?dl=0 <br/>
-Please download the directory and store it under language-classification/ <br/>
+**Please download the directory and store it under `language-classification/`** <br/>
 
-The raw data links can be found in raw_data_links.txt <br/>
-If you want to generate the data set from raw data please download all files and store them in data/raw/Big/ <br/>
+The raw data links can be found in `raw_data_links.txt` <br/>
+If you want to generate the data set from raw data please download all files and store them in `data/raw/Big/` <br/>
 
 ## Installation
 The code was written in python 2.7. <br/>
@@ -45,11 +45,11 @@ The demo can explicitly be called using
 ```
 $ python start.py --task demo
 ```
-I have created three different data sets small, medium and large each consisting of 100, 1000, and 10000 sentences respectively per language. The data set to-be-used can be defined using e.g. `--data_set small`. The values are `small`, `medium` and `large`. Default is set to `large`.
+I have created three different data sets small, medium and large each consisting of 100, 1000, and 10000 sentences respectively per language. The data set to-be-used can be defined using e.g. `--data_set small`. The values are `small`, `medium` and `large`. Default is set to `large`. The model which is called is dependent on the data set which is defined. The best model was trained using the `large` data set. 
 ```
 $ python start.py --task demo --data_set small 
 ```
-therefore calls the demo set using the model trained using the small data set. <br/>
+therefore calls the demo set using the model trained using the `small` data set (and therefore `small` model). <br/>
 
 ### Training
 A random walk over defined hyper parameters can be realized using `--task train`. <br/>
