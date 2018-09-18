@@ -62,7 +62,13 @@ class LanguageText(TextData):
 
 
     def load_data(self, data_type='train', directory=None, initialize_term=False):
-
+        """
+        This function loads all the data defined by the data set name
+        :param data_type: 'train', 'dev', 'test'
+        :param directory: DEPRECATED
+        :param initialize_term:
+        :return:
+        """
         if self.name == 'Language_Text_100':
             path = '../data/data_set/data_set_100_' + data_type
             if not os.path.isfile(path):
@@ -87,8 +93,10 @@ class LanguageText(TextData):
                     raise Exception(
                         "tokens dont exist")
 
+        # retrieve the data set from disc
         self.data_sets[data_type] = pickle_call(path)
 
+        # loop through every sentence and encode it using the embedding object
         for elem in self.data_sets[data_type]:
             line = elem['sentence']
             elem['sentence_positions'] = self.embeddings.encode_sentence(line, initialize=initialize_term,
@@ -97,6 +105,12 @@ class LanguageText(TextData):
         return self.data_sets[data_type]
 
     def bucketize_data(self, data_type, initialize):
+        """
+        Here we bucketize the sentences based on their length
+        :param data_type:  'train', 'dev', 'test'
+        :param initialize: if characters should be initialized or not
+        :return:
+        """
 
         PAD_position = self.embeddings.get_pad_pos(initialize=initialize)
 
@@ -112,16 +126,7 @@ class LanguageText(TextData):
                     break
 
 
-#
-# if __name__ == '__main__':
-#
-#     bwd = BillionWordsData()
-#
-#     file_name = '../data/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/news.en-00000-of-00100'
-#
-#     bwd.load_billion_words(data_set='train', k=1)
-#
-#     print("done")
+
 
 
 

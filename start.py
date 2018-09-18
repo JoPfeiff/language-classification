@@ -3,8 +3,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-# Possible values: 'big', 'medium', 'small'
-parser.add_argument("--data_set", default='big', type=str)
+# Possible values: 'large', 'medium', 'small'
+parser.add_argument("--data_set", default='large', type=str)
 
 # Possible values: 'demo', 'train', 'predict', 'predict_test'
 parser.add_argument("--task", default='demo', type=str)
@@ -65,10 +65,11 @@ elif parsed['task'] == 'predict':
     file_name = parsed['file']
     destination = parsed['destination']
     predict_doc_list(file_name, destination, best_param_file)
+    print "Sentences successfully predicted. "
+    print "Check out the labels at " + destination
 
 elif parsed['task'] == 'predict_test':
     predict_test_set(best_param_file)
-
 
 else:
     raise Exception("Task incorrectly defined")
