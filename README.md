@@ -30,8 +30,11 @@ The demo can explicitly be called using
 ```
 $ python start.py --task demo
 ```
-I have created three different data sets 
-
+I have created three different data sets small, medium and big each consisting of 100, 1000, and 10000 sentences respectively per language. The data set to-be-used can be defined using e.g. `--data_set small`. The values are `small`, `medium` and `big`. Default is set to `big`.
+```
+$ python start.py --task demo --data_set small 
+```
+therefore calls the demo set using the model trained using the small data set. <br/>
 
 
 
