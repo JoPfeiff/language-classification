@@ -41,16 +41,22 @@ therefore calls the demo set using the model trained using the small data set. <
 
 ### Training
 A random walk over defined hyper parameters can be realized using `--task train`. <br/>
-The following hyperparameters can be set as `ints`: <br/>
+#### The following hyperparameters can be set as `ints`: <br/>
 `--nr_samples`: number of random walks (sampled models) should be iterated over `default: 1` <br/>
-`--epochs`: max number of epochs (early stopping is on)  `dafuel: 100` <br/>
-The following hyperparameters can be set as `list`:
-`--batch_sizes`: <br/>
-`--hidden_sizes`: <br/>
-`--n_layers_list`: <br/>
-`--dropouts`: <br/>
-`--lrs`: <br/>
-`--optimizer_types`: <br/>
+`--epochs`: max number of epochs (early stopping is on)  `default: 100` <br/>
+#### The following hyperparameters can be set as `list`:
+`--batch_sizes`: sizes of the batch `default: [32]`<br/>
+`--hidden_sizes`: sizes of the LSTM cell `default: [32]`<br/>
+`--n_layers_list`: number of layers per LSTM step `default: [1]`<br/>
+`--dropouts`: dropout probabilities between LSTM layers `default: [0.0]`<br/>
+`--lrs`: initial learning rates `default: [0.001]`<br/>
+`--optimizer_types`: optimizers `default: ['adam']`<br/>
+
+The list hyperparameters are to be set using spaces. eg.g
+
+```
+$ python start.py --data_set small --task train --nr_samples 5 --epochs 300 --batch_sizes 32 64 --hidden_sizes 8 16 32 64 128 256 --n_layers_list 1 2 --dropouts 0.0 0.3 0.6 --lrs 0.001 0.0001 --optimizer_types adam sgd
+```
 
 
 
