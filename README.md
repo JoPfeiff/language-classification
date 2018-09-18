@@ -5,6 +5,8 @@ In this repository I have built a character based LSTM model that predicts the l
 ## Data
 The preprocessed training data can be found here: <br/>
 https://www.dropbox.com/sh/mrw2gm9saj4fmy1/AAAvaf5rTzFLhDWe-BM3vUiFa?dl=0 <br/>
+Please download the directory and store it under language-classification/ <br/>
+
 The raw data links can be found in raw_data_links.txt <br/>
 If you want to generate the data set from raw data please download all files and store them in data/raw/Big/ <br/>
 
@@ -33,7 +35,7 @@ The demo can explicitly be called using
 ```
 $ python start.py --task demo
 ```
-I have created three different data sets small, medium and big each consisting of 100, 1000, and 10000 sentences respectively per language. The data set to-be-used can be defined using e.g. `--data_set small`. The values are `small`, `medium` and `big`. Default is set to `big`.
+I have created three different data sets small, medium and large each consisting of 100, 1000, and 10000 sentences respectively per language. The data set to-be-used can be defined using e.g. `--data_set small`. The values are `small`, `medium` and `large`. Default is set to `large`.
 ```
 $ python start.py --task demo --data_set small 
 ```
