@@ -82,7 +82,7 @@ The script for generating the data sets can be found in `data_set_generation/dat
 
 
 # Model
-The model is a character based LSTM model. Each of the characters is one-hot-encoded. Unseen characters are replaced with an <UNK> token. A start <S> token is added to the beginning and an end token </S> is added to the end of each sentence. For training all sentences are padded using a <PAD> token. <br/>
+The model is a character based LSTM model. Each of the characters is one-hot-encoded. Unseen characters are replaced with an `<UNK>` token. A start `<S>` token is added to the beginning and an end token `</S>` is added to the end of each sentence. For training all sentences are padded using a `<PAD>` token. <br/>
 
 The last state of the LSTM is forwarded to a MLP for prediction. Each language is predicted using a softmax function. The loss is calculated using cross-entropy. 
 
