@@ -112,17 +112,35 @@ class LanguageText(TextData):
         :return:
         """
 
+        # retrieve the padding position
         PAD_position = self.embeddings.get_pad_pos(initialize=initialize)
 
+        # loop through the data set
         for elem in self.data_sets[data_type]:
+
+            # calc the length of the sentence
             sent_length = len(elem['sentence_positions'])
+
+            # loop through the bucket sizes to check which bucket the sentence fits in
             for bucket in self.buckets:
+
+                # if the sentence fits in the bucket
                 if sent_length <= bucket:
+
+                    # get the length
                     elem['length'] = sent_length
+
+                    # get the character positons
                     elem['label_pos'] = self.labels[elem['label']]
+
+                    # pad the positions to the predefined bucket length
                     elem['sentence_positions'] = pad_positions(elem['sentence_positions'], PAD_position, bucket)
+
+                    # and append to data set
                     self.data_sets[data_type + '_buckets'][bucket]['data'].append(elem)
                     self.data_sets[data_type + '_buckets'][bucket]['length'] += 1
+
+                    # if this is done, we break because we do not want to add the data point to the next bucket
                     break
 
 
