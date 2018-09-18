@@ -99,7 +99,7 @@ The data set can be built using
 ```
 and the generator which loops through the data set once:
 ```
-gen = dl.get_generator('train', drop_last=False, batch_size=64)
+  gen = dl.get_generator('train', drop_last=False, batch_size=64)
 ```
 
 
