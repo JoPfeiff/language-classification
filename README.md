@@ -1,6 +1,6 @@
 # Classification of Text Language
 
-In this repository I have built a **character based LSTM model** that predicts the language of a sentence or a text document.
+In this repository I have built a **character level LSTM model** that predicts the language of a sentence or a text document.
 The data set is based on **EU Bookshop data** which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included **32 languages** for which more than 10000 sentences exist. <br/> 
 
 This repository builds upon my `data_loading` framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
