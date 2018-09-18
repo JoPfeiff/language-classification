@@ -55,7 +55,7 @@ The raw data links can be found in `raw_data_links.txt` <br/>
 If you want to generate the data set from raw data please download all files and store them in `data/raw/Big/` <br/>
 
 ## Installation
-**PLEASE FIRST DOWNLOAD THE DATA (see previous point)**
+**PLEASE DOWNLOAD THE DATA (see previous point)**
 
 The code was written in python 2.7. <br/>
 Please consider running the code in a virtual environment: <br/>
