@@ -3,6 +3,7 @@
 In this repository I have built a **character level LSTM model** that predicts the language of a sentence or a text document.
 The data set is based on **EU Bookshop data** which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included **32 languages** for which more than 10000 sentences exist. <br/> 
 
+## Core Model Repository Structure
 This repository builds upon my `data_loading` framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
 
 The data_set is **generated** using `data_set_generation/data_set_generation.py` <br/>
