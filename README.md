@@ -52,16 +52,24 @@ A random walk over defined hyper parameters can be realized using `--task train`
 `--lrs`: initial learning rates `default: [0.001]`<br/>
 `--optimizer_types`: optimizers `default: ['adam']`<br/>
 
-The list hyperparameters are to be set using spaces. eg.g
+The list hyperparameters are to be set using spaces. e.g.:
 
 ```
 $ python start.py --data_set small --task train --nr_samples 5 --epochs 300 --batch_sizes 32 64 --hidden_sizes 8 16 32 64 128 256 --n_layers_list 1 2 --dropouts 0.0 0.3 0.6 --lrs 0.001 0.0001 --optimizer_types adam sgd
 ```
 
+### Predict Testset
+To calculate the accuracy of the test set using the best model this can be done using the task `--task predict_test`. e.g.:
+```
+$ python start.py --data_set small --task predict_test 
+```
 
+### Predict Document
+There is also the possibility to predict the labels of text documents. This API assumes that one sentence or document ist written in each line. The task for this is `--task predict`. This function additionally needs a path to a document with the sentences `--file path/to/file.txt` and a destination file where the predictions are listed `--destination path/to/destination.txt`. Note that if the destination file exists, it will be overwritten. e.g.:
 
-
-
+```
+$ python start.py --data_set small --task predict  --file path/to/file.txt --destination path/to/destination.txt
+```
 
 
 
