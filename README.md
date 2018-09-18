@@ -87,6 +87,21 @@ $ python start.py --data_set small --task predict  --file path/to/file.txt --des
 The three different data sets were built using 100, 1000, and 10000 sampled sentences for each language. The training set consists of 80% of the data whereas development and test set each consist of 10% of the data. <br/>
 The script for generating the data sets can be found in `data_set_generation/data_set_generation.py`
 
+# Building Data Set
+Please refer to the documentation here: https://github.com/JoPfeiff/nlp-data-loading-framework- <br/>
+The data set can be built using
+```
+  class_params = {'name': 'Language_Text_100'}
+  dl = DataLoader(data_set='Language_Text_100', embeddings_initial='character_100', embedding_loading='top_k',
+                  K_embeddings=float('inf'), param_dict=class_params)
+  dl.load('data/pickles/')
+  dl.get_all_and_dump('data/pickles/')
+```
+and the generator which loops through the data set once:
+```
+gen = dl.get_generator('train', drop_last=False, batch_size=64)
+```
+
 
 # Model
 We have trained a character based LSTM model. Each of the characters of a sentence is one-hot-encoded. Unseen characters are replaced with an `<UNK>` token. A start `<S>` token is added to the beginning and an end token `</S>` is added to the end of each sentence. For training all sentences are padded using a `<PAD>` token. <br/>
