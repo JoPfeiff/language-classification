@@ -5,11 +5,12 @@ The data set is based on EU Bookshop data which includes sentences of 42 differe
 
 This repository builds upon my data_loading framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
 
-The data_set is generated using data_set_generation/data_set_generation.py <br/>
-The data_set is built using data_loading/data_loader.py which gets as input the objects defined in  <br/>
- - embeddings/character_embedding.py <br/>
- - text/language_sentences.py <br/>
-The model can be found in model/lstm_characters.py <br/>
+The data_set is **generated** using `data_set_generation/data_set_generation.py` <br/>
+The data_set is **built** using `data_loading/data_loader.py` which gets as input the objects defined in  <br/>
+ - **one-hot encodings**: `embeddings/character_embedding.py` <br/>
+ - **bucketized sentences**: `text/language_sentences.py` 
+ 
+The **model** can be found in `model/lstm_characters.py` <br/>
 
 ## Data
 The preprocessed training data can be found here: <br/>
