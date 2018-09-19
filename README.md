@@ -3,38 +3,19 @@
 In this repository I have built a **character level LSTM model** that predicts the language of a sentence or a text document.
 The data set is based on **EU Bookshop data** which includes sentences of 42 different languages. The raw data can be found here http://opus.nlpl.eu/EUbookshop.php. Note however that I only included **32 languages** for which more than 10000 sentences exist. <br/> 
 The following Languages are supported:
-- Bulgarian = 'bg'
-- Catalan  = 'ca' <br/>
-- Czeck = 'cs' <br/>
-- Walsh = 'cy' <br/>
-- Danish = 'da' <br/>
-- German = 'de' <br/>
-- Greek = 'el' <br/>
-- English = 'en' <br/>
-- Spanish = 'es' <br/>
-- Estonian = 'et' <br/>
-- Finnish = 'fi' <br/>
-- French = 'fr' <br/>
-- Irish = 'ga' <br/>
-- Croatian = 'hr' <br/>
-- Hungarian = 'hu' <br/>
-- Islandic = 'is' <br/>
-- Italian = 'it' <br/>
-- Lithuanian = 'lt' <br/>
-- Latvian = 'lv' <br/>
-- Mazedonian = 'mk' <br/>
-- Maltan = 'mt' <br/>
-- Norwegian = 'nb' <br/>
-- Dutch = 'nl' <br/>
-- Polish = 'pl' <br/>
-- Portuguese = 'pt' <br/>
-- Romanian = 'ro' <br/>
-- Russian = 'ru' <br/>
-- Slowakian = 'sk' <br/>
-- Slowenian = 'sl' <br/>
-- Swedish = 'sv' <br/>
-- Turkish = 'tr' <br/>
-- Ukranian = 'uk' <br/>
+
+| Language     | Label |   | Language     | Label |   | Language     | Label |   | Language     | Label |
+|:------------:|:-----:|:-:|:------------:|:-----:|:-:|:------------:|:-----:|:-:|:------------:|:-----:|
+| Bulgarian    |  'bg' |   | Spanish      | 'es'  |   | Italian      | 'it'  |   | Portuguese   | 'pt'  | 
+| Catalan      |  'ca' |   | Estonian     | 'et'  |   | Lithuanian   | 'lt'  |   | Romanian     | 'ro'  | 
+| Czeck        | 'cs'  |   | Finnish      | 'fi'  |   | Latvian      | 'lv'  |   | Russian      | 'ru'  | 
+| Walsh        | 'cy'  |   | French       | 'fr'  |   | Mazedonian   | 'mk'  |   | Slowakian    | 'sk'  |
+| Danish       |  'da' |   | Irish        | 'ga'  |   | Maltan       | 'mt'  |   | Slowenian    | 'sl'  |
+| German       | 'de'  |   | Croatian     | 'hr'  |   | Norwegian    |'nb'   |   | Swedish      | 'sv'  |
+| Greek        | 'el'  |   | Hungarian    | 'hu'  |   | Dutch        | 'nl'  |   | Turkish      | 'tr'  |
+| English      | 'en'  |   | Islandic     | 'is'  |   | Polish       | 'pl'  |   | Ukranian     | 'uk'  |
+
+
 
 ## Core Model Repository Structure
 This repository builds upon my `data_loading` framework which can be found here: https://github.com/JoPfeiff/nlp-data-loading-framework-
